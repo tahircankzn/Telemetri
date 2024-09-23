@@ -1,5 +1,7 @@
 # 22.09.24 
 # Telemetri gösterge panelleri eklendi ve test edildi
+# 23.09.24 
+# Telemetri gösterge panellerinin doğruluğu düzeltildi
 
 import collections.abc
 import collections
@@ -129,7 +131,7 @@ class Telemetri(QWidget):
 
         # Gösterge Panel değerlerinin güncellenmesi
         self.degeryeinle_t=QTimer()
-        self.degeryeinle_t.setInterval(1000)
+        self.degeryeinle_t.setInterval(100)
         self.degeryeinle_t.start()
         self.degeryeinle_t.timeout.connect(self.degeryeinle)
   
@@ -137,17 +139,19 @@ class Telemetri(QWidget):
     def calculate_turn_rate(self):
         # Zaman aralığı ve yaw açısındaki değişimi kullanarak dönüş oranını hesabı
         delta_time = 1
-        yaw_change = self.vehicle.attitude.yaw - self.telemetri_verileri["yaw"]  
-        return (yaw_change / delta_time )*10 
+        #yaw_change = self.vehicle.attitude.yaw - self.telemetri_verileri["yaw"]  
+        yaw_change = self.telemetri_verileri["roll"]  
+        return (yaw_change / delta_time )*10 * (1)
     
 
     def calculate_slip_skid(self):
         # Yüksek hız ve dönüş oranlarını dikkate alarak kayma hesabı
-        slip = self.vehicle.groundspeed * math.sin(self.vehicle.attitude.roll) 
+        slip = self.vehicle.groundspeed * math.sin(self.vehicle.attitude.roll) * (1)
         return slip
 
 
     def degeryeinle(self):
+        
 
         self.qfi_ADI.setRoll(float(self.telemetri_verileri["roll"]*100))
         self.qfi_ADI.setPitch(float(self.telemetri_verileri["pitch"]*100))
@@ -168,6 +172,8 @@ class Telemetri(QWidget):
         self.qfi_TC.setTurnRate(float(self.calculate_turn_rate()))
         self.qfi_TC.setSlipSkid(float(self.calculate_slip_skid()))
         self.qfi_TC.viewUpdate.emit()
+
+        print(float(self.calculate_turn_rate()),self.telemetri_verileri["yaw"]  )
 
 
     def exit(self):
